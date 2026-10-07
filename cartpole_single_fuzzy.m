@@ -137,3 +137,81 @@ fprintf('\n==================================================================\n'
 fprintf('  Đã khởi tạo thành công Single Unified Fuzzy Controller!\n');
 fprintf('  File "cartpole_single_unified.fis" đã được lưu sẵn sàng cho Simulink.\n');
 fprintf('==================================================================\n');
+
+%% 10. Chạy mô phỏng kiểm thử trực tiếp trong MATLAB (Góc nghiêng 20 độ)
+fprintf('  Đang chạy mô phỏng phi tuyến hệ xe - con lắc trong MATLAB (20 độ)...\n');
+
+% Thông số vật lý chuẩn từ SolidWorks full_pendulum_assem_DataFile3.m
+M_cart = 0.059118;   % Khối lượng xe (kg)
+m_pole = 0.019634;   % Khối lượng con lắc (kg)
+l_com  = 0.11063;    % Khoảng cách trọng tâm con lắc (m)
+I_pole = 1.9733e-4;  % Momen quán tính con lắc (kg.m^2)
+g_acc  = 9.81;       % Gia tốc trọng trường (m/s^2)
+b_cart = 0.05;       % Hệ số ma sát ray trượt (N.s/m)
+b_pole = 0.0003;     % Hệ số cản khớp quay (N.m.s/rad)
+
+dt_sim = 0.002;
+t_sim  = 0:dt_sim:5.0;
+N_steps = length(t_sim);
+
+x_arr   = zeros(1, N_steps);
+xd_arr  = zeros(1, N_steps);
+th_arr  = zeros(1, N_steps);
+thd_arr = zeros(1, N_steps);
+F_arr   = zeros(1, N_steps);
+
+% Điều kiện đầu: Con lắc nghiêng 20 độ (0.349 rad)
+th_arr(1) = deg2rad(20.0);
+
+for k = 1:N_steps-1
+    % Tính lực từ bộ điều khiển Fuzzy
+    F_calc = evalfis(cpFIS, [th_arr(k), thd_arr(k), x_arr(k), xd_arr(k)]);
+    F_arr(k) = max(min(F_calc, 10.0), -10.0);
+    
+    % Động lực học phi tuyến chính xác
+    sin_th = sin(th_arr(k));
+    cos_th = cos(th_arr(k));
+    D_mat = (M_cart + m_pole)*(I_pole + m_pole*l_com^2) - (m_pole*l_com*cos_th)^2;
+    
+    f1 = F_arr(k) + m_pole*l_com*thd_arr(k)^2*sin_th - b_cart*xd_arr(k);
+    f2 = m_pole*g_acc*l_com*sin_th - b_pole*thd_arr(k);
+    
+    xdd  = ((I_pole + m_pole*l_com^2)*f1 - m_pole*l_com*cos_th*f2) / D_mat;
+    thdd = (-m_pole*l_com*cos_th*f1 + (M_cart + m_pole)*f2) / D_mat;
+    
+    xd_arr(k+1)  = xd_arr(k) + dt_sim*xdd;
+    x_arr(k+1)   = x_arr(k) + dt_sim*xd_arr(k+1);
+    thd_arr(k+1) = thd_arr(k) + dt_sim*thdd;
+    th_arr(k+1)  = th_arr(k) + dt_sim*thd_arr(k+1);
+end
+F_arr(N_steps) = evalfis(cpFIS, [th_arr(N_steps), thd_arr(N_steps), x_arr(N_steps), xd_arr(N_steps)]);
+
+% Vẽ đồ thị kết quả mô phỏng
+figure('Name', 'Simulation Results in MATLAB: 20 deg Recovery', 'Position', [150 150 900 650]);
+
+subplot(3, 1, 1);
+plot(t_sim, rad2deg(th_arr), 'r-', 'LineWidth', 2); hold on;
+yline(0, 'k:'); yline(1, 'g--'); yline(-1, 'g--');
+title('Đáp ứng Góc nghiêng con lắc \theta(t) (Góc ban đầu \theta_0 = 20^\circ)');
+ylabel('\theta (độ)'); grid on;
+legend('\theta(t)', 'Điểm cân bằng 0^\circ', 'Dải xác lập \pm1^\circ', 'Location', 'northeast');
+
+subplot(3, 1, 2);
+plot(t_sim, x_arr, 'b-', 'LineWidth', 2); hold on;
+yline(0, 'k:'); yline(0.40, 'r--', 'Giới hạn ray +0.4m'); yline(-0.40, 'r--', 'Giới hạn ray -0.4m');
+title('Đáp ứng Vị trí xe x(t) trên thanh ray');
+ylabel('x (m)'); grid on;
+legend('Vị trí x(t)', 'Gốc 0m', 'Location', 'northeast');
+
+subplot(3, 1, 3);
+plot(t_sim, F_arr, 'm-', 'LineWidth', 1.8); hold on;
+yline(0, 'k:'); yline(10, 'r:'); yline(-10, 'r:');
+title('Lực tác động điều khiển F(t)');
+xlabel('Thời gian t (s)'); ylabel('Lực F (N)'); grid on;
+legend('Lực F(t)', 'Location', 'northeast');
+
+fprintf('  --> Mô phỏng MATLAB hoàn tất thành công!\n');
+fprintf('      Góc cuối cùng: %.3f độ\n', rad2deg(th_arr(end)));
+fprintf('      Vị trí cuối cùng: %.4f m\n', x_arr(end));
+fprintf('      Độ trượt ray cực đại: %.3f m (Giới hạn cho phép: +/-0.40 m)\n', max(abs(x_arr)));
+fprintf('==================================================================\n');
