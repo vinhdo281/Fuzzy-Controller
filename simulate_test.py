@@ -13,7 +13,7 @@ def run_simulation(duration=5.0, theta_init_deg=5.0, x_ref=0.0, mode="single"):
         x_ref: target position of cart in meters
         mode: 'single' (Unified 4-in-1-out FIS) or 'cascade' (2-loop FIS)
     """
-    model_path = os.path.join(os.path.dirname(__file__), "cart_pendulum_hust.xml")
+    model_path = os.path.join(os.path.dirname(__file__), "full_pendulum_assem.xml")
     m = mujoco.MjModel.from_xml_path(model_path)
     d = mujoco.MjData(m)
 

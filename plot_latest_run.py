@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from fuzzy_single_controller import SingleUnifiedFuzzyController
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "cart_pendulum_hust.xml")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "full_pendulum_assem.xml")
 
 def simulate_system(theta_init_deg=20.0, x_ref_func=None, duration=6.0):
     m = mujoco.MjModel.from_xml_path(MODEL_PATH)

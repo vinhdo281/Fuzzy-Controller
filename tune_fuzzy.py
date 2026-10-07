@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import minimize
 from fuzzy_controller import FuzzyPD
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "cart_pendulum_hust.xml")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "full_pendulum_assem.xml")
 
 def evaluate_controller(params, render=False):
     """

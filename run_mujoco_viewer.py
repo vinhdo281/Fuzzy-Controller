@@ -15,7 +15,7 @@ import mujoco.viewer
 import numpy as np
 from fuzzy_single_controller import SingleUnifiedFuzzyController
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "cart_pendulum_hust.xml")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "full_pendulum_assem.xml")
 
 def main():
     m = mujoco.MjModel.from_xml_path(MODEL_PATH)

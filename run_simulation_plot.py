@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from fuzzy_controller import FuzzyPD
 
 # Use model with exact HUST SolidWorks parameters
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "cart_pendulum_hust.xml")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "full_pendulum_assem.xml")
 
 def run_simulation(scenario="perturbation", duration=5.0):
     m = mujoco.MjModel.from_xml_path(MODEL_PATH)

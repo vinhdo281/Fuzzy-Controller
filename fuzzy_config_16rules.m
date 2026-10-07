@@ -193,3 +193,4 @@ disp('  Force: NL=-10N, NM=-7N, PM=+7N, PL=+10N (gbellmf)');
 disp('Rules: 16 luat day du (2^4 to hop)');
 disp('  - Theta la yeu to quyet dinh chinh (trong so 1.0)');
 disp('  - X, X_dot la yeu to phu (anh huong muc NM<->NL, PM<->PL)');
+
