@@ -283,14 +283,16 @@ Fuzzy-Controller/
 ├── fuzzy_config_16rules.m           # ★ All-in-one MATLAB: cấu hình FIS + 16 luật + đồ thị
 ├── cartpole_single_fuzzy.m          # MATLAB sim đầy đủ: FIS + ODE + đồ thị
 ├── cartpole_single_unified.fis      # FIS export — dùng trực tiếp cho Simulink
-├── cartpole_16rules.fis             # FIS 16 luật — sinh bởi fuzzy_config_16rules.m
 │
 ├── fuzzy_single_controller.py       # Python: Single Unified Mamdani FIS (core logic)
 ├── simulate_test.py                 # Bộ kiểm thử 3 kịch bản (5°, 20°, 22°)
 ├── run_mujoco_viewer.py             # Viewer 3D tương tác (MuJoCo passive viewer)
 ├── run_simulation_single_fuzzy.py   # Chạy sim + xuất đồ thị PNG
 ├── plot_latest_run.py               # Vẽ đồ thị 6 kênh từ lần chạy gần nhất
-├── tune_fuzzy.py                    # Công cụ auto-tune tham số MF
+│
+├── simscape-multibody-dieu-khien-con-lac-nguoc-voi-fuzzy.md # ★ Bài viết hướng dẫn chi tiết
+├── index.html                       # Redirect tới bài viết web (GitHub Pages)
+├── posts/                           # Giao diện web bài viết độc lập (HTML5/KaTeX/CSS)
 │
 ├── latest_run_response_20deg.png    # Kết quả mô phỏng 20° (hình trong README)
 └── fuzzy_single_mujoco_response.png # Kết quả đồ thị xuất bởi run_simulation_single_fuzzy.py
