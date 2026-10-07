@@ -24,17 +24,17 @@ cpFIS = mamfis(...
     'AggregationMethod', 'sum', ...
     'DefuzzificationMethod', 'centroid');
 
-%% 2. Khai báo Input 1: Theta (rad) - Góc nghiêng con lắc
+%% 2. Khai báo Input 1: Theta (rad) - Góc nghiêng con lắc (Mở rộng cho góc lớn đến 20-25 độ)
 cpFIS.Inputs(1).Name = 'Theta';
 cpFIS.Inputs(1).Range = [-pi, pi];
 
 cpFIS.Inputs(1).MembershipFunctions(1).Name = 'Negative';
 cpFIS.Inputs(1).MembershipFunctions(1).Type = 'zmf';
-cpFIS.Inputs(1).MembershipFunctions(1).Parameters = [-0.15, 0.15];
+cpFIS.Inputs(1).MembershipFunctions(1).Parameters = [-0.20, 0.20];
 
 cpFIS.Inputs(1).MembershipFunctions(2).Name = 'Positive';
 cpFIS.Inputs(1).MembershipFunctions(2).Type = 'smf';
-cpFIS.Inputs(1).MembershipFunctions(2).Parameters = [-0.15, 0.15];
+cpFIS.Inputs(1).MembershipFunctions(2).Parameters = [-0.20, 0.20];
 
 %% 3. Khai báo Input 2: Theta_dot (rad/s) - Vận tốc góc con lắc
 cpFIS.Inputs(2).Name = 'Theta_dot';
@@ -42,11 +42,11 @@ cpFIS.Inputs(2).Range = [-15, 15];
 
 cpFIS.Inputs(2).MembershipFunctions(1).Name = 'Negative';
 cpFIS.Inputs(2).MembershipFunctions(1).Type = 'zmf';
-cpFIS.Inputs(2).MembershipFunctions(1).Parameters = [-2.5, 2.5];
+cpFIS.Inputs(2).MembershipFunctions(1).Parameters = [-3.5, 3.5];
 
 cpFIS.Inputs(2).MembershipFunctions(2).Name = 'Positive';
 cpFIS.Inputs(2).MembershipFunctions(2).Type = 'smf';
-cpFIS.Inputs(2).MembershipFunctions(2).Parameters = [-2.5, 2.5];
+cpFIS.Inputs(2).MembershipFunctions(2).Parameters = [-3.5, 3.5];
 
 %% 4. Khai báo Input 3: x (m) - Sai số vị trí xe (x - x_ref)
 cpFIS.Inputs(3).Name = 'x';
@@ -72,45 +72,43 @@ cpFIS.Inputs(4).MembershipFunctions(2).Name = 'Positive';
 cpFIS.Inputs(4).MembershipFunctions(2).Type = 'smf';
 cpFIS.Inputs(4).MembershipFunctions(2).Parameters = [-0.5, 0.5];
 
-%% 6. Khai báo Output: Force (N) - Lực tác động lên xe
+%% 6. Khai báo Output: Force (N) - Tăng lực điều khiển đáp ứng góc 20 độ
 cpFIS.Outputs(1).Name = 'Force';
-cpFIS.Outputs(1).Range = [-10, 10];
+cpFIS.Outputs(1).Range = [-12, 12];
 
-% Negative Large (-8 N): Lực hãm / đẩy cực mạnh
+% Negative Large (-10 N): Lực hãm / đẩy cực mạnh (toàn tải động cơ)
 cpFIS.Outputs(1).MembershipFunctions(1).Name = 'NL';
 cpFIS.Outputs(1).MembershipFunctions(1).Type = 'gbellmf';
-cpFIS.Outputs(1).MembershipFunctions(1).Parameters = [3.0, 2.0, -8.0];
+cpFIS.Outputs(1).MembershipFunctions(1).Parameters = [3.0, 2.0, -10.0];
 
-% Negative Medium (-3.5 N): Lực vừa
+% Negative Medium (-7 N): Lực phản xạ góc mạnh
 cpFIS.Outputs(1).MembershipFunctions(2).Name = 'NM';
 cpFIS.Outputs(1).MembershipFunctions(2).Type = 'gbellmf';
-cpFIS.Outputs(1).MembershipFunctions(2).Parameters = [2.0, 2.0, -3.5];
+cpFIS.Outputs(1).MembershipFunctions(2).Parameters = [2.5, 2.0, -7.0];
 
-% Positive Medium (+3.5 N): Lực vừa
+% Positive Medium (+7 N): Lực phản xạ góc mạnh
 cpFIS.Outputs(1).MembershipFunctions(3).Name = 'PM';
 cpFIS.Outputs(1).MembershipFunctions(3).Type = 'gbellmf';
-cpFIS.Outputs(1).MembershipFunctions(3).Parameters = [2.0, 2.0, 3.5];
+cpFIS.Outputs(1).MembershipFunctions(3).Parameters = [2.5, 2.0, 7.0];
 
-% Positive Large (+8 N): Lực hãm / đẩy cực mạnh
+% Positive Large (+10 N): Lực hãm / đẩy cực mạnh (toàn tải động cơ)
 cpFIS.Outputs(1).MembershipFunctions(4).Name = 'PL';
 cpFIS.Outputs(1).MembershipFunctions(4).Type = 'gbellmf';
-cpFIS.Outputs(1).MembershipFunctions(4).Parameters = [3.0, 2.0, 8.0];
+cpFIS.Outputs(1).MembershipFunctions(4).Parameters = [3.0, 2.0, 10.0];
 
 %% 7. Tập luật điều khiển hợp nhất (Unified Rule Base)
 % Nguyên lý vật lý:
-% - Nhóm góc (Theta, Theta_dot): Ưu tiên cao nhất (Weight = 1.0) giữ vững con lắc.
-% - Nhóm vị trí (x, x_dot): Ưu tiên vừa (Weight = 0.25). 
-%   Khi xe ở bên phải (x > 0), đẩy xe sang phải (PM) làm con lắc nghiêng sang trái,
-%   sau đó nhóm góc kéo xe chạy sang trái về lại gốc 0 (Cơ chế Nghiêng Để Lái hợp nhất).
+% - Nhóm góc (Theta, Theta_dot): Ưu tiên cao nhất (Weight = 1.0) giữ vững con lắc ngay cả ở 20 độ.
+% - Nhóm vị trí (x, x_dot): Trọng số phối hợp (Weight = 0.35) kéo xe giữ trong tầm ray (-0.4m, +0.4m).
 rules = [...
     "If Theta is Negative then Force is NM (1.0)"; ...
     "If Theta is Positive then Force is PM (1.0)"; ...
     "If Theta_dot is Negative then Force is NL (1.0)"; ...
     "If Theta_dot is Positive then Force is PL (1.0)"; ...
-    "If x is Negative then Force is NM (0.25)"; ...
-    "If x is Positive then Force is PM (0.25)"; ...
-    "If x_dot is Negative then Force is NL (0.25)"; ...
-    "If x_dot is Positive then Force is PL (0.25)"];
+    "If x is Negative then Force is NM (0.35)"; ...
+    "If x is Positive then Force is PM (0.35)"; ...
+    "If x_dot is Negative then Force is NL (0.35)"; ...
+    "If x_dot is Positive then Force is PL (0.35)"];
 
 cpFIS = addRule(cpFIS, rules);
 

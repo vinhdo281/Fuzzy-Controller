@@ -70,12 +70,17 @@ def run_simulation(duration=5.0, theta_init_deg=5.0, x_ref=0.0, mode="single"):
     return True, (t_hist, x_hist, theta_hist, f_hist)
 
 if __name__ == "__main__":
-    # Test Single Unified Controller with 5 degrees initial tilt
+    # Test 1: Single Unified Controller with 5 degrees initial tilt
     print("\n--- Test 1: Single Unified Controller (theta_0 = 5 deg) ---")
-    success, res = run_simulation(duration=5.0, theta_init_deg=5.0, x_ref=0.0, mode="single")
-    print("Success:", success)
+    success1, res1 = run_simulation(duration=5.0, theta_init_deg=5.0, x_ref=0.0, mode="single")
+    print("Success:", success1)
 
-    # Test Single Unified Controller with 1 degree initial tilt
-    print("\n--- Test 2: Single Unified Controller (theta_0 = 1 deg) ---")
-    success2, res2 = run_simulation(duration=5.0, theta_init_deg=1.0, x_ref=0.0, mode="single")
+    # Test 2: Single Unified Controller with 20 degrees initial tilt (User requirement)
+    print("\n--- Test 2: Single Unified Controller (theta_0 = 20 deg) ---")
+    success2, res2 = run_simulation(duration=5.0, theta_init_deg=20.0, x_ref=0.0, mode="single")
     print("Success:", success2)
+
+    # Test 3: Single Unified Controller with 22 degrees initial tilt (Extreme limit test)
+    print("\n--- Test 3: Single Unified Controller (theta_0 = 22 deg) ---")
+    success3, res3 = run_simulation(duration=5.0, theta_init_deg=22.0, x_ref=0.0, mode="single")
+    print("Success:", success3)

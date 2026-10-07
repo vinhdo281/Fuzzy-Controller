@@ -28,22 +28,22 @@ def gbellmf(x, a, b, c):
 
 class SingleUnifiedFuzzyController:
     def __init__(self, n_points=301):
-        self.F_grid = np.linspace(-10.0, 10.0, n_points)
-        # Precompute output membership functions
-        self.mf_NL = gbellmf(self.F_grid, 3.0, 2.0, -8.0)
-        self.mf_NM = gbellmf(self.F_grid, 2.0, 2.0, -3.5)
-        self.mf_PM = gbellmf(self.F_grid, 2.0, 2.0,  3.5)
-        self.mf_PL = gbellmf(self.F_grid, 3.0, 2.0,  8.0)
+        self.F_grid = np.linspace(-12.0, 12.0, n_points)
+        # Precompute output membership functions (Increased force authority: +/-7N and +/-10N)
+        self.mf_NL = gbellmf(self.F_grid, 3.0, 2.0, -10.0)
+        self.mf_NM = gbellmf(self.F_grid, 2.5, 2.0,  -7.0)
+        self.mf_PM = gbellmf(self.F_grid, 2.5, 2.0,   7.0)
+        self.mf_PL = gbellmf(self.F_grid, 3.0, 2.0,  10.0)
 
     def compute(self, theta, theta_dot, x, x_dot, x_ref=0.0):
         e_x = x - x_ref
 
-        # 1. Fuzzification
-        mu_th_neg = zmf(theta, -0.15, 0.15)
-        mu_th_pos = smf(theta, -0.15, 0.15)
+        # 1. Fuzzification (Expanded range for large angle balance up to 20-25 deg)
+        mu_th_neg = zmf(theta, -0.20, 0.20)
+        mu_th_pos = smf(theta, -0.20, 0.20)
 
-        mu_thd_neg = zmf(theta_dot, -2.5, 2.5)
-        mu_thd_pos = smf(theta_dot, -2.5, 2.5)
+        mu_thd_neg = zmf(theta_dot, -3.5, 3.5)
+        mu_thd_pos = smf(theta_dot, -3.5, 3.5)
 
         mu_x_neg = zmf(e_x, -0.25, 0.25)
         mu_x_pos = smf(e_x, -0.25, 0.25)
@@ -58,11 +58,11 @@ class SingleUnifiedFuzzyController:
         clip3 = 1.0 * np.minimum(mu_thd_neg, self.mf_NL)
         clip4 = 1.0 * np.minimum(mu_thd_pos, self.mf_PL)
 
-        # Position rules (Weight = 0.25)
-        clip5 = 0.25 * np.minimum(mu_x_neg, self.mf_NM)
-        clip6 = 0.25 * np.minimum(mu_x_pos, self.mf_PM)
-        clip7 = 0.25 * np.minimum(mu_xd_neg, self.mf_NL)
-        clip8 = 0.25 * np.minimum(mu_xd_pos, self.mf_PL)
+        # Position rules (Weight = 0.35)
+        clip5 = 0.35 * np.minimum(mu_x_neg, self.mf_NM)
+        clip6 = 0.35 * np.minimum(mu_x_pos, self.mf_PM)
+        clip7 = 0.35 * np.minimum(mu_xd_neg, self.mf_NL)
+        clip8 = 0.35 * np.minimum(mu_xd_pos, self.mf_PL)
 
         # 3. Aggregation (Sum)
         agg = clip1 + clip2 + clip3 + clip4 + clip5 + clip6 + clip7 + clip8
@@ -74,7 +74,7 @@ class SingleUnifiedFuzzyController:
         else:
             force = 0.0
 
-        return force
+        return float(np.clip(force, -10.0, 10.0))
 
 if __name__ == "__main__":
     ctrl = SingleUnifiedFuzzyController()

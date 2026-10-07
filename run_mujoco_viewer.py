@@ -21,8 +21,8 @@ def main():
     m = mujoco.MjModel.from_xml_path(MODEL_PATH)
     d = mujoco.MjData(m)
 
-    # Initial perturbation (e.g. 4 degrees)
-    d.qpos[1] = np.deg2rad(4.0)
+    # Initial perturbation: 20 degrees tilt (User specified large perturbation test)
+    d.qpos[1] = np.deg2rad(20.0)
 
     # Single Unified Fuzzy Controller (4 Inputs -> 1 Output Force)
     ctrl = SingleUnifiedFuzzyController()
