@@ -61,7 +61,7 @@ def main():
 
             # Print status every 500 steps (1.0s)
             if step_count % 500 == 0:
-                print(f"[t={d.time:5.2f}s] Cart x={x:+.3f}m | Angle θ={np.rad2deg(th):+.2f}° | Force F={F:+.3f}N")
+                print(f"[t={d.time:5.2f}s] Cart x={x:+.3f}m | Angle theta={np.rad2deg(th):+.2f} deg | Force F={F:+.3f}N")
 
             time_until_next_step = m.opt.timestep - (time.time() - step_start)
             if time_until_next_step > 0:
