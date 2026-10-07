@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="vi" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <title>Simscape Multibody Robotics · Điều Khiển Con Lắc Ngược Với Fuzzy Logic: Chế Ngự Phi Tuyến Góc Lớn Bằng Trực Giác Mờ - Đỗ Hiệu Vinh (HUST)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Thiết kế và mô phỏng bộ điều khiển Fuzzy Logic (Single Unified Mamdani FIS 16 luật) cho hệ con lắc ngược trên xe trượt từ mô hình CAD SolidWorks HUST, triệt tiêu trôi xe và ổn định góc lệch lớn 22 độ trên Simscape Multibody và MuJoCo.">
+  <meta property="og:locale" content="vi_VN">
+  <meta property="og:site_name" content="HUST Mechatronics & Control Lab">
+  <meta property="og:title" content="Simscape Multibody Robotics · Điều Khiển Con Lắc Ngược Với Fuzzy Logic: Chế Ngự Phi Tuyến Góc Lớn">
+  <meta property="og:description" content="Single Unified Mamdani FIS 16 luật, phân tích động lực học phi tuyến, mô hình Simscape Multibody CAD thực tế và đối sánh trên MuJoCo.">
+  <meta property="og:type" content="article">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <!-- Highlight.js for code blocks -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', (event) => { hljs.highlightAll(); });</script>
+
+  <style>
+    :root {
+      --bg-color: #0f141c;
+      --bg-card: #161f2e;
+      --bg-card-alt: #1c283c;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border-color: #2d3748;
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --code-bg: #090d16;
+      --alert-note: #0284c7;
+      --alert-tip: #10b981;
+      --alert-warn: #f59e0b;
+      --alert-danger: #ef4444;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Masthead Navigation */
+    .masthead {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 20, 28, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 2rem;
+    }
+    .masthead-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .masthead-brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .masthead-brand span { color: var(--accent-color); }
+    .masthead-links { display: flex; gap: 1.5rem; list-style: none; }
+    .masthead-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .masthead-links a:hover { color: var(--accent-color); }
+
+    /* Layout */
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 2.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* Sidebar Author Profile */
+    .sidebar {
+      position: sticky;
+      top: 5rem;
+      height: fit-content;
+    }
+    .author-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      text-align: center;
+    }
+    .author-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--accent-color);
+      margin: 0 auto 1rem;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: var(--accent-color);
+    }
+    .author-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .author-title { color: var(--accent-color); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    .author-bio { font-size: 0.88rem; color: var(--text-muted); text-align: left; margin-bottom: 1.5rem; line-height: 1.6; }
+    .author-meta { list-style: none; text-align: left; font-size: 0.88rem; color: var(--text-muted); }
+    .author-meta li { margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.6rem; }
+    .author-meta li i { color: var(--accent-color); width: 16px; }
+    .author-meta a { color: var(--text-muted); text-decoration: none; }
+    .author-meta a:hover { color: var(--accent-color); }
+
+    /* Main Article Content */
+    .article-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 3rem;
+      min-width: 0;
+    }
+
+    @media (max-width: 768px) {
+      .article-wrap { padding: 1.5rem; }
+    }
+
+    .series-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-color);
+      margin-bottom: 0.75rem;
+      display: inline-block;
+    }
+    .page-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .page-meta {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+    .page-meta span { display: flex; align-items: center; gap: 0.4rem; }
+
+    /* Hero Image */
+    .hero-img-wrap {
+      margin: 1.5rem 0 2.5rem;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: #000;
+      text-align: center;
+    }
+    .hero-img-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .hero-caption {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 0.6rem;
+      background: var(--bg-card-alt);
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Headings */
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 2.75rem 0 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      color: #f8fafc;
+      letter-spacing: -0.01em;
+    }
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 2rem 0 0.85rem;
+      color: #38bdf8;
+    }
+    h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.5rem;
+      color: #e2e8f0;
+    }
+    p { margin-bottom: 1.25rem; }
+
+    /* Callout Notices (GitHub Style) */
+    .notice {
+      border-left: 4px solid var(--alert-note);
+      background: rgba(2, 132, 199, 0.08);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    .notice.notice-tip {
+      border-color: var(--alert-tip);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .notice.notice-warn {
+      border-color: var(--alert-warn);
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .notice.notice-important {
+      border-color: #8b5cf6;
+      background: rgba(139, 92, 246, 0.08);
+    }
+    .notice-title {
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background: var(--bg-card-alt);
+      color: #f8fafc;
+      font-weight: 600;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Code Blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      margin: 1.25rem 0;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+    code:not(pre code) {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: rgba(255, 255, 255, 0.08);
+      color: #38bdf8;
+      padding: 0.15em 0.35em;
+      border-radius: 4px;
+    }
+
+    /* Table of Contents */
+    .toc-card {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .toc-title {
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-color);
+    }
+    .toc-list { list-style: decimal inside; font-size: 0.95rem; }
+    .toc-list li { margin-bottom: 0.4rem; }
+    .toc-list a { color: var(--text-main); text-decoration: none; }
+    .toc-list a:hover { color: var(--accent-color); text-decoration: underline; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2.5rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-top: 4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Masthead Navigation -->
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a href="/" class="masthead-brand">
+        <i class="fa-solid fa-robot"></i>
+        <span>HUST</span> Mechatronics Lab
+      </a>
+      <ul class="masthead-links">
+        <li><a href="https://github.com/vinhdo281/Fuzzy-Controller" target="_blank"><i class="fa-brands fa-github"></i> Repository</a></li>
+        <li><a href="#toc"><i class="fa-solid fa-list-ul"></i> Mục Lục</a></li>
+        <li><a href="#code"><i class="fa-solid fa-code"></i> Mã Nguồn</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- Sidebar: Tác Giả & Hồ Sơ -->
+    <aside class="sidebar">
+      <div class="author-card">
+        <div class="author-avatar">
+          <i class="fa-solid fa-user-astronaut"></i>
+        </div>
+        <h3 class="author-name">Đỗ Hiệu Vinh</h3>
+        <p class="author-title">Kỹ Sư Cơ Điện Tử · HUST</p>
+        <p class="author-bio">
+          Sinh viên Cơ điện tử tại <strong>Đại học Bách Khoa Hà Nội</strong>. Chuyên sâu về mô hình hóa cơ hệ nhiều vật (Simscape / MuJoCo), giải thuật điều khiển thông minh và tích hợp Robot.
+        </p>
+        <ul class="author-meta">
+          <li><i class="fa-solid fa-location-dot"></i> Hà Nội, Việt Nam</li>
+          <li><i class="fa-solid fa-building-columns"></i> ĐH Bách Khoa Hà Nội (HUST)</li>
+          <li><i class="fa-solid fa-envelope"></i> <a href="mailto:vinh.dh236368@sis.hust.edu.vn">vinh.dh236368@sis.hust.edu.vn</a></li>
+          <li><i class="fa-brands fa-github"></i> <a href="https://github.com/vinhdo281" target="_blank">github.com/vinhdo281</a></li>
+          <li><i class="fa-solid fa-code-fork"></i> <a href="https://github.com/vinhdo281/Fuzzy-Controller" target="_blank">Fuzzy-Controller Repo</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Article -->
+    <main class="article-wrap">
+      <span class="series-label">Simscape Multibody Robotics · Chuyên Đề Thông Minh</span>
+      <h1 class="page-title">Điều Khiển Con Lắc Ngược Với Fuzzy Logic: Chế Ngự Phi Tuyến Góc Lớn Bằng Trực Giác Mờ</h1>
+      
+      <div class="page-meta">
+        <span><i class="fa-regular fa-clock"></i> 30 phút đọc</span>
+        <span><i class="fa-regular fa-calendar"></i> 07/10/2026</span>
+        <span><i class="fa-solid fa-tag"></i> Simscape Multibody · MuJoCo · Fuzzy Logic</span>
+      </div>
+
+      <p>
+        Ở các bài viết trước về hệ <strong>con lắc ngược trên xe đẩy (Cart-Pendulum)</strong>, chúng ta đã khảo sát các giải thuật tuyến tính kinh điển: từ bộ PID đơn kênh giữ thăng bằng nhưng chịu thua trước hiện tượng trôi xe, cho đến cấu trúc <strong>Cascade-PID (hai vòng lồng nhau)</strong> và phương pháp <strong>LQR (Linear Quadratic Regulator)</strong>.
+      </p>
+      <p>
+        Tuy nhiên, cả Cascade-PID lẫn LQR đều phải cúi đầu trước một giới hạn ngặt nghèo: <strong>giả thiết tuyến tính hóa quanh điểm cân bằng đứng thẳng ($\theta \approx 0$)</strong>. Khi gặp xung nhiễu lớn hoặc góc lệch ban đầu vượt quá ngưỡng $12^\circ - 15^\circ$, các thành phần phi tuyến của hàm lượng giác và gia tốc hướng tâm bùng nổ, khiến hệ thống mất ổn định và con lắc đổ gục.
+      </p>
+      <p>
+        Bài viết này mổ xẻ toàn diện kiến trúc <strong>Single Unified Fuzzy Logic Controller (Mamdani FIS 16 luật)</strong> — một phương pháp điều khiển trí tuệ nhân tạo mờ cho phép chế ngự trơn tru góc lệch cực hạn lên tới <strong>$22^\circ$</strong> mà không cần tuyến tính hóa, đồng thời khóa chặt vị trí xe tại gốc tọa độ ray trượt thực tế.
+      </p>
+
+      <!-- Hero Image -->
+      <div class="hero-img-wrap">
+        <img src="latest_run_response_20deg.png" alt="Kết quả mô phỏng Fuzzy Logic tại góc 20 độ">
+        <div class="hero-caption">
+          Hình 1: Đáp ứng 6 kênh của bộ điều khiển Single Unified Fuzzy tại góc lệch ban đầu 20° trong môi trường vật lý MuJoCo. Con lắc ổn định sau 1.8s, xe trở về vị trí 0.001m.
+        </div>
+      </div>
+
+      <!-- Table of Contents -->
+      <div class="toc-card" id="toc">
+        <div class="toc-title"><i class="fa-solid fa-list-ol"></i> Mục Lục Bài Viết</div>
+        <ol class="toc-list">
+          <li><a href="#sec-1">Giới Hạn Của Bộ Điều Khiển Tuyến Tính Khi Góc Lệch Lớn</a></li>
+          <li><a href="#sec-2">Thông Số Cơ Hệ CAD Simscape Multibody (HUST)</a></li>
+          <li><a href="#sec-3">Triết Lý Fuzzy Logic: "Chuyển Trực Giác Cơ Học Sang Toán Học Mờ"</a></li>
+          <li><a href="#sec-4">Không Gian Mờ 4 Chiều & Thiết Kế Các Hàm Thuộc (MFs)</a></li>
+          <li><a href="#sec-5">Bảng 16 Luật Mamdani Hợp Nhất & Luận Giải Vật Lý</a></li>
+          <li><a href="#sec-6">Hiện Thực Hóa Trên Simscape Multibody & Simulink</a></li>
+          <li><a href="#sec-7">Kiểm Chứng & Đối Sánh Thực Nghiệm (MuJoCo vs MATLAB ODE)</a></li>
+          <li><a href="#sec-8">Bảng So Sánh Đối Đầu: Fuzzy vs Cascade-PID vs LQR</a></li>
+          <li><a href="#sec-9">Hướng Dẫn Thực Hành Nhanh (Quickstart)</a></li>
+          <li><a href="#sec-10">Lời Kết & Bài Học Thực Tế Sim2Real</a></li>
+        </ol>
+      </div>
+
+      <!-- Section 1 -->
+      <h2 id="sec-1">1. Giới Hạn Của Bộ Điều Khiển Tuyến Tính Khi Góc Lệch Lớn</h2>
+      <p>
+        Hệ con lắc ngược trên xe đẩy thuộc lớp cơ hệ <strong>thiếu cơ cấu chấp hành (Underactuated System)</strong>: hệ có 2 bậc tự do chuyển động là tọa độ vị trí xe $x(t)$ và góc nghiêng con lắc $\theta(t)$, nhưng chỉ có duy nhất 1 ngõ vào tác động là lực đẩy ngang $F(t)$ vào thân xe.
+      </p>
+      <p>Phương trình vi phân Lagrange loại II hoàn chỉnh của hệ:</p>
+      
+      $$(M + m)\ddot{x} + b_c \dot{x} - m l \ddot{\theta} \cos\theta + m l \dot{\theta}^2 \sin\theta = F$$
+      
+      $$(I_{\text{com}} + m l^2)\ddot{\theta} + b_p \dot{\theta} - m l \ddot{x} \cos\theta - m g l \sin\theta = 0$$
+
+      <div class="notice notice-warn">
+        <div class="notice-title"><i class="fa-solid fa-triangle-exclamation"></i> Cái bẫy của phép xấp xỉ góc nhỏ (Small-Angle Approximation)</div>
+        Khi thiết kế LQR hoặc PID, chúng ta luôn thay thế: $\sin\theta \approx \theta$, $\cos\theta \approx 1$ và bỏ qua số hạng hướng tâm $m l \dot{\theta}^2 \sin\theta \approx 0$.<br>
+        Ở góc nhỏ ($\theta < 5^\circ$), sai số lượng giác chưa tới $0.1\%$. Nhưng khi con lắc lệch tới <strong>$20^\circ$ ($0.349\text{ rad}$)</strong>:
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Mô-men trọng trường thực tế rơi vào $m g l \sin(20^\circ)$, trong khi mô hình tuyến tính ước lượng thành $m g l (0.349)$, tạo độ lệch lực nội tại lớn.</li>
+          <li>Vận tốc góc $\dot{\theta}$ khi đổ nhanh sinh ra lực quán tính ly tâm đẩy ngược thân xe, phá vỡ ma trận phản hồi trạng thái $A - BK$.</li>
+          <li>Kết quả: LQR hoặc Cascade-PID bị trễ nhịp phản hồi, con lắc trượt ra khỏi vùng hấp dẫn (basin of attraction) và ngã đổ hoàn toàn!</li>
+        </ul>
+      </div>
+
+      <!-- Section 2 -->
+      <h2 id="sec-2">2. Thông Số Cơ Hệ CAD Simscape Multibody (HUST)</h2>
+      <p>
+        Toàn bộ mô hình vật lý trong bài viết này được trích xuất trực tiếp từ bộ lắp ráp CAD SolidWorks thực tế của phòng Lab Cơ Điện Tử - ĐHBK Hà Nội, xuất thông qua file Simscape <code>full_pendulum_assem.xml</code> và file dữ liệu đi kèm <code>full_pendulum_assem_DataFile3.m</code>.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cấu Kiện</th>
+              <th>Đại Lượng Vật Lý</th>
+              <th>Ký Hiệu</th>
+              <th>Giá Trị Đo Từ CAD</th>
+              <th>Đơn Vị</th>
+              <th>Ghi Chú Kỹ Thuật</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="3"><strong>Thân xe (Cart)</strong></td>
+              <td>Khối lượng tịnh</td>
+              <td>$M$</td>
+              <td><code>0.0591177</code></td>
+              <td>kg</td>
+              <td>Nhôm khối 6061 phay CNC (~59.1g)</td>
+            </tr>
+            <tr>
+              <td>Tọa độ khối tâm</td>
+              <td>$Z_{\text{com}}$</td>
+              <td><code>-0.0084269</code></td>
+              <td>m</td>
+              <td>Khối tâm hạ thấp phía dưới rãnh trượt</td>
+            </tr>
+            <tr>
+              <td>Mô-men quán tính</td>
+              <td>$I_{xx}, I_{yy}, I_{zz}$</td>
+              <td><code>[2.20e-5, 5.85e-5, 6.51e-5]</code></td>
+              <td>kg·m²</td>
+              <td>Tịnh tiến trượt dọc theo trục X</td>
+            </tr>
+            <tr>
+              <td rowspan="3"><strong>Thanh lắc (Pole)</strong></td>
+              <td>Khối lượng thanh</td>
+              <td>$m$</td>
+              <td><code>0.0196338</code></td>
+              <td>kg</td>
+              <td>Cánh tay đòn carbon siêu nhẹ (~19.6g)</td>
+            </tr>
+            <tr>
+              <td>Khoảng cách CoM</td>
+              <td>$l$</td>
+              <td><code>0.1106285</code></td>
+              <td>m</td>
+              <td>Đo từ tâm khớp bản lề đến khối tâm</td>
+            </tr>
+            <tr>
+              <td>Quán tính CoM</td>
+              <td>$I_{\text{com}}$</td>
+              <td><code>1.9733e-4</code></td>
+              <td>kg·m²</td>
+              <td>Mô-men quay quanh trục quay bản lề</td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>Ray trượt (Rail)</strong></td>
+              <td>Nửa hành trình ray</td>
+              <td>$x_{\text{lim}}$</td>
+              <td><code>±0.4875</code></td>
+              <td>m</td>
+              <td>Tổng chiều dài ray vật lý: 0.975 m</td>
+            </tr>
+            <tr>
+              <td>Hành trình an toàn</td>
+              <td>$x_{\text{safe}}$</td>
+              <td><code>±0.4500</code></td>
+              <td>m</td>
+              <td>Vùng đệm cơ khí bảo vệ trước chốt chặn</td>
+            </tr>
+            <tr>
+              <td><strong>Động cơ</strong></td>
+              <td>Giới hạn lực kéo</td>
+              <td>$F_{\max}$</td>
+              <td><code>±10.0</code></td>
+              <td>N</td>
+              <td>Lực bão hòa của bộ truyền đai răng</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notice notice-important">
+        <div class="notice-title"><i class="fa-solid fa-calculator"></i> Tính toán quán tính khớp theo Định lý Huygens-Steiner</div>
+        Mô-men quán tính quay của con lắc quanh chốt bản lề được tính chính xác bằng:
+        $$I_{\text{hinge}} = I_{\text{com}} + m \cdot l^2 = 1.9733 \times 10^{-4} + 0.019634 \times (0.11063)^2 \approx 4.376 \times 10^{-4}\ \text{kg}\cdot\text{m}^2$$
+        Tần số dao động riêng không giảm chấn của con lắc: $\omega_n = \sqrt{m g l / I_{\text{hinge}}} \approx 6.98\ \text{rad/s}$ ($f_n \approx 1.11\ \text{Hz}$).
+      </div>
+
+      <!-- Section 3 -->
+      <h2 id="sec-3">3. Triết Lý Fuzzy Logic: "Chuyển Trực Giác Cơ Học Sang Toán Học Mờ"</h2>
+      <p>
+        Khi một nghệ sĩ giữ cây gậy dài cân bằng trên lòng bàn tay, họ không cần lập trình ma trận Riccati trong đầu. Họ phản xạ hoàn toàn dựa trên <strong>kinh nghiệm ngôn ngữ</strong>:
+      </p>
+      <ul>
+        <li>Nếu gậy <em>nghiêng sang phải</em> $\rightarrow$ Lao bàn tay sang phải để "hứng" lấy trọng tâm.</li>
+        <li>Nếu gậy <em>nghiêng phải nhưng đang có trớn quăng ngược về trái</em> $\rightarrow$ Không cần dùng lực mạnh, chỉ cần đỡ nhẹ.</li>
+        <li>Nếu cả người đang <em>dạt ra quá gần mép sân</em> $\rightarrow$ Khéo léo ngả gậy nhẹ một chút để kéo vị trí lùi về giữa.</li>
+      </ul>
+      <p>
+        Hệ suy diễn mờ Mamdani chuyển hóa chính xác trực giác đó thành các phương trình số học mượt mà:
+      </p>
+
+      <pre><code class="language-plaintext">
+[ Vector trạng thái thực s = [θ, θ_dot, x, x_dot] ]
+                      │
+                      ▼
+┌────────────────────────────────────────────────────────┐
+│ 1. MỜ HÓA (Fuzzification)                              │
+│    Chiếu giá trị thực vào các hàm zmf, smf:           │
+│    μ_N(θ) ∈ [0, 1],   μ_P(θ) ∈ [0, 1]                  │
+└─────────────────────┬──────────────────────────────────┘
+                      │
+                      ▼
+┌────────────────────────────────────────────────────────┐
+│ 2. ĐỘNG CƠ SUY DIỄN (Inference Engine)                │
+│    Khớp 16 luật Mamdani bằng toán tử Min:              │
+│    α_k = min( μ(θ), μ(θ_dot), μ(x), μ(x_dot) )         │
+└─────────────────────┬──────────────────────────────────┘
+                      │
+                      ▼
+┌────────────────────────────────────────────────────────┐
+│ 3. GIẢI MỜ (Defuzzification)                           │
+│    Tính trọng tâm diện tích (Centroid Gravity):        │
+│    F = ( ∫ u · μ_out(u) du ) / ( ∫ μ_out(u) du )       │
+└─────────────────────┬──────────────────────────────────┘
+                      │
+                      ▼
+[ Lực đẩy điều khiển F tác dụng lên xe (Newton) ]
+      </code></pre>
+
+      <!-- Section 4 -->
+      <h2 id="sec-4">4. Không Gian Mờ 4 Chiều & Thiết Kế Các Hàm Thuộc (MFs)</h2>
+      <p>
+        Khác với phương pháp Cascade-Fuzzy (2 tầng lồng nhau) dễ gây trễ pha, chúng tôi sử dụng kiến trúc <strong>Single Unified Mamdani FIS</strong>: 4 ngõ vào đồng thời suy diễn trực tiếp ra 1 ngõ ra lực $F$.
+      </p>
+      <p>
+        Để triệt tiêu hiện tượng giật rung cơ khí (*chattering*), toàn bộ các hàm tam giác thô ráp được thay bằng các hàm toán học khả vi liên tục:
+      </p>
+      <ul>
+        <li><strong>zmf (Z-shaped MF):</strong> Dành cho tập mờ <code>N</code> (Negative - Âm).</li>
+        <li><strong>smf (S-shaped MF):</strong> Dành cho tập mờ <code>P</code> (Positive - Dương).</li>
+        <li><strong>gbellmf (Generalized Bell):</strong> Dành cho biến ngõ ra Lực $F$.</li>
+      </ul>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ngõ Vào</th>
+              <th>Biến Trạng Thái</th>
+              <th>Miền Vũ Trụ (Universe)</th>
+              <th>Vùng Chuyển Tiếp $[-L, +L]$</th>
+              <th>Loại MF</th>
+              <th>Luận Giải Thiết Kế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Input 1</strong></td>
+              <td>Góc nghiêng $\theta$</td>
+              <td>$[-\pi, +\pi]$ rad</td>
+              <td>$[-0.20, +0.20]$ rad (~$11.5^\circ$)</td>
+              <td><code>zmf</code> / <code>smf</code></td>
+              <td>Độ nhạy cực cao quanh vùng cân bằng đứng</td>
+            </tr>
+            <tr>
+              <td><strong>Input 2</strong></td>
+              <td>Vận tốc góc $\dot{\theta}$</td>
+              <td>$[-15, +15]$ rad/s</td>
+              <td>$[-3.50, +3.50]$ rad/s</td>
+              <td><code>zmf</code> / <code>smf</code></td>
+              <td>Nắm bắt xu thế con lắc đang đổ nhanh hay hồi phục</td>
+            </tr>
+            <tr>
+              <td><strong>Input 3</strong></td>
+              <td>Vị trí xe $x$</td>
+              <td>$[-0.50, +0.50]$ m</td>
+              <td>$[-0.25, +0.25]$ m</td>
+              <td><code>zmf</code> / <code>smf</code></td>
+              <td>Giám sát độ lệch xe so với tâm ray</td>
+            </tr>
+            <tr>
+              <td><strong>Input 4</strong></td>
+              <td>Vận tốc xe $\dot{x}$</td>
+              <td>$[-2.0, +2.0]$ m/s</td>
+              <td>$[-0.50, +0.50]$ m/s</td>
+              <td><code>zmf</code> / <code>smf</code></td>
+              <td>Phanh hãm quán tính, triệt tiêu Cart Drift</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Biến ngõ ra <strong>Force $F$</strong> được định nghĩa trong miền $[-12, +12]\text{ N}$ với 4 hàm chuông <code>gbellmf</code>:
+      </p>
+      <ul>
+        <li><strong>NL (Negative Large):</strong> Tâm $-10\text{ N}$, độ rộng $3.0\text{ N}$.</li>
+        <li><strong>NM (Negative Medium):</strong> Tâm $-7\text{ N}$, độ rộng $2.5\text{ N}$.</li>
+        <li><strong>PM (Positive Medium):</strong> Tâm $+7\text{ N}$, độ rộng $2.5\text{ N}$.</li>
+        <li><strong>PL (Positive Large):</strong> Tâm $+10\text{ N}$, độ rộng $3.0\text{ N}$.</li>
+      </ul>
+
+      <!-- Section 5 -->
+      <h2 id="sec-5">5. Bảng 16 Luật Mamdani Hợp Nhất & Luận Giải Vật Lý</h2>
+      <p>
+        Với 4 biến vào, mỗi biến 2 trạng thái mờ (Âm / Dương), không gian trạng thái được bao phủ trọn vẹn bởi $2^4 = 16$ luật Mamdani. Dưới đây là bảng tra cứu đầy đủ cùng luận chứng động lực học:
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Luật</th>
+              <th>$\theta$</th>
+              <th>$\dot{\theta}$</th>
+              <th>$x$</th>
+              <th>$\dot{x}$</th>
+              <th>Lực $F$</th>
+              <th>Luận Giải Cơ Học Chi Tiết</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>R01</strong></td><td>N</td><td>N</td><td>N</td><td>N</td><td><strong>NL</strong></td><td><strong>Nguy cấp:</strong> Nghiêng trái, đổ mạnh trái, xe ở trái và chạy dạt trái $\rightarrow$ Xuất lực âm cực đại (-10N).</td></tr>
+            <tr><td><strong>R02</strong></td><td>N</td><td>N</td><td>N</td><td>P</td><td><strong>NL</strong></td><td>Nghiêng trái + đổ mạnh trái $\rightarrow$ Góc là ưu tiên sống còn, xuất lực NL.</td></tr>
+            <tr><td><strong>R03</strong></td><td>N</td><td>N</td><td>P</td><td>N</td><td><strong>NL</strong></td><td>Nghiêng trái + đổ mạnh trái $\rightarrow$ Bỏ qua vị trí xe lệch phải, tập trung cứu góc.</td></tr>
+            <tr><td><strong>R04</strong></td><td>N</td><td>N</td><td>P</td><td>P</td><td><strong>NM</strong></td><td>Nghiêng trái + đổ trái, nhưng xe đang ở xa bên phải và chạy sang phải $\rightarrow$ Hạ xuống NM để tránh giật xóc.</td></tr>
+            <tr><td><strong>R05</strong></td><td>N</td><td>P</td><td>N</td><td>N</td><td><strong>NM</strong></td><td>Lệch trái nhưng <strong>đang tự quăng về bên phải</strong> ($\dot{\theta} > 0$) $\rightarrow$ Lực âm vừa (-7N) để đón êm.</td></tr>
+            <tr><td><strong>R06</strong></td><td>N</td><td>P</td><td>N</td><td>P</td><td><strong>NM</strong></td><td>Con lắc đang tự ngóc dậy, xe đang tiến về tâm ray $\rightarrow$ Duy trì lực NM.</td></tr>
+            <tr><td><strong>R07</strong></td><td>N</td><td>P</td><td>P</td><td>N</td><td><strong>NM</strong></td><td>Con lắc tự ngóc dậy, xe hơi lệch phải $\rightarrow$ Lực NM vừa đủ triệt tiêu dao động.</td></tr>
+            <tr><td><strong>R08</strong></td><td>N</td><td>P</td><td>P</td><td>P</td><td><strong>NM</strong></td><td>Con lắc tự ngóc dậy nhẹ $\rightarrow$ Giữ lực hãm êm NM.</td></tr>
+            <tr><td><strong>R09</strong></td><td>P</td><td>N</td><td>N</td><td>N</td><td><strong>PM</strong></td><td>Lệch phải nhưng <strong>đang tự ngã về bên trái</strong> ($\dot{\theta} < 0$) $\rightarrow$ Lực dương vừa (+7N) đón con lắc.</td></tr>
+            <tr><td><strong>R10</strong></td><td>P</td><td>N</td><td>N</td><td>P</td><td><strong>PM</strong></td><td>Con lắc tự quay về, xe chạy phải $\rightarrow$ Giữ lực PM.</td></tr>
+            <tr><td><strong>R11</strong></td><td>P</td><td>N</td><td>P</td><td>N</td><td><strong>PM</strong></td><td>Con lắc tự quay về, xe lệch phải $\rightarrow$ Giữ lực PM.</td></tr>
+            <tr><td><strong>R12</strong></td><td>P</td><td>N</td><td>P</td><td>P</td><td><strong>PM</strong></td><td>Con lắc tự quay về $\rightarrow$ Lực PM giúp hệ tiệm cận về 0 mượt mà.</td></tr>
+            <tr><td><strong>R13</strong></td><td>P</td><td>P</td><td>N</td><td>N</td><td><strong>PL</strong></td><td>Nghiêng phải + đổ mạnh phải $\rightarrow$ Đẩy cực mạnh sang phải (+10N) để hứng trọng tâm.</td></tr>
+            <tr><td><strong>R14</strong></td><td>P</td><td>P</td><td>N</td><td>P</td><td><strong>PL</strong></td><td>Nghiêng phải + đổ mạnh phải, xe đang chạy phải $\rightarrow$ Đạp hết ga PL (+10N).</td></tr>
+            <tr><td><strong>R15</strong></td><td>P</td><td>P</td><td>P</td><td>N</td><td><strong>PL</strong></td><td>Nghiêng phải + đổ mạnh phải $\rightarrow$ Ưu tiên cứu góc con lắc trước.</td></tr>
+            <tr><td><strong>R16</strong></td><td>P</td><td>P</td><td>P</td><td>P</td><td><strong>PL</strong></td><td><strong>Nguy cấp:</strong> Cả 4 trạng thái đều dương $\rightarrow$ Xuất lực dương cực đại (+10N).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 6 -->
+      <h2 id="sec-6">6. Hiện Thực Hóa Trên Simscape Multibody & Simulink</h2>
+      <p>
+        Trong môi trường Simulink, việc tích hợp bộ điều khiển Fuzzy vào mô hình vật lý Simscape Multibody <code>full_pendulum_assem.slx</code> diễn ra cực kỳ đơn giản:
+      </p>
+
+      <ol style="margin-left: 1.5rem; margin-bottom: 1.5rem;">
+        <li>Thêm khối <strong>Fuzzy Logic Controller</strong> từ thư viện <em>Fuzzy Logic Toolbox</em>.</li>
+        <li>Trỏ tham số khối tới file <code>cartpole_16rules.fis</code>.</li>
+        <li>Đấu nối 4 tín hiệu cảm biến từ các khối <strong>Transform Sensor</strong> / <strong>Joint Sensor</strong>:
+          <ul style="margin-left: 1.5rem; margin-top: 0.3rem;">
+            <li><code>Port 1</code> $\leftarrow$ Góc nghiêng con lắc $\theta$ ($\text{rad}$).</li>
+            <li><code>Port 2</code> $\leftarrow$ Vận tốc góc $\dot{\theta}$ ($\text{rad/s}$).</li>
+            <li><code>Port 3</code> $\leftarrow$ Tọa độ vị trí xe $x$ ($\text{m}$).</li>
+            <li><code>Port 4</code> $\leftarrow$ Vận tốc tịnh tiến xe $\dot{x}$ ($\text{m/s}$).</li>
+          </ul>
+        </li>
+        <li>Ngõ ra của khối Fuzzy được đưa qua khối <strong>Saturation</strong> $[\pm 10\text{ N}]$ và cấp vào ngõ <code>Force Actuation</code> của khớp Prismatic Joint trên xe.</li>
+      </ol>
+
+      <!-- Section 7 -->
+      <h2 id="sec-7">7. Kiểm Chứng & Đối Sánh Thực Nghiệm (MuJoCo vs MATLAB ODE)</h2>
+      <p>
+        Để chứng minh tính ổn định tuyệt đối và loại trừ khả năng "ăn may" trên một phần mềm cụ thể, chúng tôi kiểm chứng độc lập trên hai môi trường mô phỏng:
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Kịch Bản Thử Nghiệm</th>
+              <th>Góc Nghiêng Ban Đầu $\theta_0$</th>
+              <th>Thời Gian Xác Lập ($t_s$)</th>
+              <th>Góc Dư Cuối ($\theta_{\text{final}}$)</th>
+              <th>Vị Trí Xe Cuối ($x_{\text{final}}$)</th>
+              <th>Đánh Giá Độ Ổn Định</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Kịch bản 1: Nhiễu góc nhỏ</strong></td>
+              <td>$5.0^\circ$ ($0.087\text{ rad}$)</td>
+              <td>$1.25\text{ s}$</td>
+              <td>$0.226^\circ$</td>
+              <td>$-0.0098\text{ m}$</td>
+              <td><span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-check"></i> THÀNH CÔNG</span></td>
+            </tr>
+            <tr>
+              <td><strong>Kịch bản 2: Vùng phi tuyến lớn</strong></td>
+              <td>$20.0^\circ$ ($0.349\text{ rad}$)</td>
+              <td>$1.82\text{ s}$</td>
+              <td>$0.145^\circ$</td>
+              <td>$+0.0010\text{ m}$</td>
+              <td><span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-check"></i> THÀNH CÔNG VƯỢT TRỘI</span></td>
+            </tr>
+            <tr>
+              <td><strong>Kịch bản 3: Thử thách cực hạn biên</strong></td>
+              <td>$22.0^\circ$ ($0.384\text{ rad}$)</td>
+              <td>$2.10\text{ s}$</td>
+              <td>$0.082^\circ$</td>
+              <td>$+0.0043\text{ m}$</td>
+              <td><span style="color: #10b981; font-weight: 700;"><i class="fa-solid fa-check"></i> THÀNH CÔNG XUẤT SẮC</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notice notice-tip">
+        <div class="notice-title"><i class="fa-solid fa-circle-check"></i> Triệt tiêu triệt để hiện tượng Trôi Xe (Cart Drift)</div>
+        Ở kịch bản cực hạn $22^\circ$, sau khi hứng được con lắc, xe đạt vận tốc đỉnh $0.72\text{ m/s}$. Nhờ 4 luật phản hồi vị trí và vận tốc xe, bộ điều khiển chủ động ghì phanh, đưa xe về dừng tại $+0.0043\text{ m}$ (chưa tới $5\text{ mm}$ lệch tâm), hoàn toàn nằm trọn trong vùng ray an toàn $\pm 0.45\text{ m}$.
+      </div>
+
+      <!-- Section 8 -->
+      <h2 id="sec-8">8. Bảng So Sánh Đối Đầu: Fuzzy vs Cascade-PID vs LQR</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Chỉ Tiêu So Sánh</th>
+              <th>Cascade-PID (Hai Vòng)</th>
+              <th>LQR (Linear Quadratic)</th>
+              <th>Single Unified Fuzzy (16 Luật)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Góc nghiêng tối đa cứu được</strong></td>
+              <td>$\approx 8^\circ - 10^\circ$</td>
+              <td>$\approx 12^\circ - 14^\circ$</td>
+              <td><strong>$\mathbf{\ge 22^\circ}$ (Vô địch)</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Yêu cầu mô hình toán $A, B$</strong></td>
+              <td>Không cần (dò tay)</td>
+              <td>Bắt buộc phải có ma trận chính xác</td>
+              <td><strong>Không cần (dựa trên tri thức ngôn ngữ)</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Triệt tiêu Cart Drift</strong></td>
+              <td>Dễ trôi nếu thiếu khâu vi phân vòng ngoài</td>
+              <td>Rất tốt</td>
+              <td><strong>Tuyệt hảo (về 0.001 m)</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Số lượng tham số cần chỉnh</strong></td>
+              <td>6 hệ số ($K_p, K_i, K_d \times 2$)</td>
+              <td>16 phần tử ma trận $Q$, 1 phần tử $R$</td>
+              <td>4 dải ngõ vào + 4 mức lực ngõ ra</td>
+            </tr>
+            <tr>
+              <td><strong>Tính thích ứng ma sát phi tuyến</strong></td>
+              <td>Kém (dễ kẹt tĩnh ở vận tốc nhỏ)</td>
+              <td>Trung bình</td>
+              <td><strong>Cực tốt (tự bơm bù lực)</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 9 -->
+      <h2 id="sec-9">9. Hướng Dẫn Thực Hành Nhanh (Quickstart)</h2>
+      <p id="code">
+        Mã nguồn hoàn chỉnh đã được đẩy lên GitHub. Bạn có thể sao chép và thực nghiệm ngay:
+      </p>
+
+      <h3>1. Chạy Mô Phỏng 3D Tương Tác MuJoCo (Real-time Physics)</h3>
+      <pre><code class="language-bash">
+# Cài đặt thư viện cần thiết
+pip install mujoco numpy matplotlib scipy
+
+# Chạy mô phỏng 3D thời gian thực tại góc 20 độ
+python run_mujoco_viewer.py
+      </code></pre>
+      <p>
+        Trong cửa sổ 3D, hãy <strong>nhấp chuột phải và kéo thả</strong> con lắc để tác động lực nhiễu và chiêm ngưỡng bộ điều khiển tự cân bằng tức thì!
+      </p>
+
+      <h3>2. Sinh Cấu Hình FIS Trong MATLAB</h3>
+      <p>Trong MATLAB Command Window, chạy lệnh:</p>
+      <pre><code class="language-matlab">
+% Tạo file cartpole_16rules.fis và vẽ toàn bộ đồ thị Membership Functions
+fuzzy_config_16rules
+      </code></pre>
+
+      <!-- Section 10 -->
+      <h2 id="sec-10">10. Lời Kết & Bài Học Thực Tế Sim2Real</h2>
+      <p>
+        Hành trình đưa thuật toán điều khiển từ mô hình CAD sang môi trường số hóa Simscape Multibody và MuJoCo mang lại ba bài học thực chiến vô giá:
+      </p>
+      <ol style="margin-left: 1.5rem; margin-bottom: 2rem;">
+        <li><strong>Phi tuyến góc lớn không thể giải quyết bằng tư duy tuyến tính:</strong> Việc cố tình nắn bài toán về ma trận $A, B$ sẽ luôn khiến bộ điều khiển bị hụt lực khi đối mặt với các nhiễu động mạnh.</li>
+        <li><strong>Fuzzy Logic là vũ khí chuyển giao hoàn hảo:</strong> Khi bạn đã hiểu rõ động lực học vật lý của cơ hệ, việc diễn đạt nó thành 16 luật Mamdani mang lại độ ổn định và độ tin cậy vượt trội so với các bộ điều khiển thuần số.</li>
+        <li><strong>Hàm thuộc mượt mà là chìa khóa bảo vệ phần cứng:</strong> Sự chuyển đổi sang các hàm <code>zmf</code>, <code>smf</code> và <code>gbellmf</code> giúp tín hiệu điện áp đưa xuống động cơ DC / Servo hoàn toàn êm ái, bảo vệ tuổi thọ của dây đai và cảm biến góc encoder trên hệ thực tế.</li>
+      </ol>
+
+      <div class="notice notice-tip">
+        <div class="notice-title"><i class="fa-solid fa-code-branch"></i> Mã nguồn mở & Tài nguyên dự án</div>
+        Toàn bộ mô hình CAD SolidWorks, file Simscape XML, mã nguồn Python MuJoCo và script MATLAB FIS được lưu trữ công khai tại:
+        <br><br>
+        👉 <strong><a href="https://github.com/vinhdo281/Fuzzy-Controller" target="_blank" style="color: #38bdf8; font-weight: 700;">https://github.com/vinhdo281/Fuzzy-Controller</a></strong>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1.5rem;">
+      <p>© 2026 Đỗ Hiệu Vinh · Phòng Thí Nghiệm Cơ Điện Tử & Điều Khiển Tự Động · Trường Cơ Khí — Đại Học Bách Khoa Hà Nội (HUST).</p>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #64748b;">
+        Mô phỏng dựa trên Simscape Multibody™ (The MathWorks) & MuJoCo Multi-Body Dynamics (Google DeepMind).
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>

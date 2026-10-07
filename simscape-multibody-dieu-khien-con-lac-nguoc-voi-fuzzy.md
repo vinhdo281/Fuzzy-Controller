@@ -412,3 +412,4 @@ Qua việc thiết kế và kiểm chứng bộ điều khiển **Single Unified
 3. K. J. Åström and K. Furuta, "Swinging up a pendulum by energy control," *Automatica*, vol. 36, no. 2, pp. 287–295, 2000.
 4. MuJoCo Multi-Joint dynamics with Contact, Documentation and Python API ([mujoco.readthedocs.io](https://mujoco.readthedocs.io)).
 5. The MathWorks Inc., *Fuzzy Logic Toolbox & Simscape Multibody User's Guide*, R2024b/R2025a.
+
