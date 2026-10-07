@@ -1,0 +1,52 @@
+<mujoco model="cart_pendulum_hust">
+  <compiler angle="radian" coordinate="local"/>
+
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+
+  <visual>
+    <headlight ambient="0.4 0.4 0.4" diffuse="0.8 0.8 0.8" specular="0.1 0.1 0.1"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.1 0.2 0.3" rgb2="0.2 0.3 0.4" width="512" height="512"/>
+    <material name="grid" texture="grid" texrepeat="2 2" texuniform="true"/>
+    <material name="cart_mat" rgba="0.2 0.4 0.8 1"/>
+    <material name="pole_mat" rgba="0.9 0.2 0.2 1"/>
+    <material name="rail_mat" rgba="0.6 0.6 0.6 0.9"/>
+    <material name="hinge_mat" rgba="0.1 0.1 0.1 1"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" type="plane" size="2 2 0.1" material="grid" contype="0" conaffinity="0"/>
+    
+    <!-- Guideway / Rail (pure visual, no collision) -->
+    <geom name="rail" type="capsule" fromto="-0.45 0 0.2 0.45 0 0.2" size="0.006" material="rail_mat" contype="0" conaffinity="0"/>
+    <geom name="left_stop" type="box" pos="-0.45 0 0.2" size="0.01 0.04 0.04" rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0"/>
+    <geom name="right_stop" type="box" pos="0.45 0 0.2" size="0.01 0.04 0.04" rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0"/>
+
+    <!-- Cart Body: Parameters from SolidWorks full_pendulum_assem_DataFile3.m -->
+    <body name="cart" pos="0 0 0.2">
+      <!-- M = 0.059118 kg, custom inertia from DataFile3 -->
+      <inertial pos="0 0 -0.0084" mass="0.059118" diaginertia="2.1955e-5 5.8487e-5 6.5129e-5"/>
+      <joint name="cart_slider" type="slide" axis="1 0 0" range="-0.40 0.40" damping="0.05" frictionloss="0.01"/>
+      <geom name="cart_geom" type="box" size="0.04 0.03 0.02" material="cart_mat" contype="0" conaffinity="0"/>
+      <geom name="cart_hinge_bearing" type="cylinder" size="0.008 0.015" pos="0 0 0.02" quat="0.7071 0.7071 0 0" material="hinge_mat" contype="0" conaffinity="0"/>
+
+      <!-- Pole Body: Parameters from SolidWorks full_pendulum_assem_DataFile3.m -->
+      <!-- Center of Mass at 0.11063 m along pole, m = 0.019634 kg, I_rot = 1.9733e-4 kg*m^2 -->
+      <body name="pole" pos="0 0 0.02">
+        <inertial pos="0 0 0.11063" mass="0.019634" diaginertia="1.9733e-4 1.9733e-4 1.1899e-5"/>
+        <joint name="pole_hinge" type="hinge" axis="0 1 0" damping="0.0003" frictionloss="0.00005"/>
+        <geom name="pole_geom" type="capsule" fromto="0 0 0 0 0 0.23" size="0.004" material="pole_mat" contype="0" conaffinity="0"/>
+        <geom name="pole_tip" type="sphere" pos="0 0 0.23" size="0.008" rgba="1 0.8 0.1 1" contype="0" conaffinity="0"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- Force Actuator applied to Cart Slider -->
+    <motor name="cart_force" joint="cart_slider" gear="1" ctrllimited="true" ctrlrange="-10 10"/>
+  </actuator>
+</mujoco>

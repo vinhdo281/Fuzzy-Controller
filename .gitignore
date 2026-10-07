@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# MATLAB temp files
+*.asv
+*.slxc
+slprj/
+
+# OS files
+.DS_Store
+Thumbs.db
