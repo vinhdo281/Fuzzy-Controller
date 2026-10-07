@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SimscapeMultibodyImportXML version="2.0" xmlns="urn:mathworks:SimscapeMultibody:import" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Created by="" on="09/19/26||13:25:57" using="Simscape Multibody Link Version 7.4" from="SolidWorks 34.3.2"/>
+<ModelUnits mass="kilogram" length="millimeter"/>
+<DataUnits mass="kilogram" length="meter"/>
+<RootAssembly name="full_pendulum_assem" uid="full_pendulum_assem" version="40262">
+<AssemblyFile name="full_pendulum_assem.SLDASM" type="SolidWorks Assembly"/>
+<InstanceTree>
+<Instance name="pole-1" uid="pole-1" entityUid="pole*:*Default">
+<Transform>
+<Rotation>0 0 -1 1 2.7755575615628914e-16 0 1.1102230246251565e-16 -1.0000000000000002 0</Rotation>
+<Translation>0.0077510584503812097 -0.041141762203706932 -0.16828865932851708</Translation>
+</Transform>
+</Instance>
+<Instance name="cart-1" uid="cart-1" entityUid="cart*:*Default">
+<Transform>
+<Rotation>1 0 0 0 1 0 0 0 1</Rotation>
+<Translation>0.017751058450381149 -0.041141762203706932 -0.16828865932851708</Translation>
+</Transform>
+</Instance>
+<Instance name="worldframe-1" uid="worldframe-1" grounded="true" entityUid="worldframe*:*Default">
+<Transform>
+<Rotation>-1 0 0 0 0 -1 0 -1 0</Rotation>
+<Translation>0.017751058450381149 -0.041141762203706932 -0.18828865932851707</Translation>
+</Transform>
+</Instance>
+</InstanceTree>
+<Constraints>
+<Concentric name="Concentric2">
+<ConstraintGeometry geomType="cylinder">
+<InstancePath>
+<Uid>cart-1</Uid>
+</InstancePath>
+<Position>0 0.045388543819998323 -0.01999999999999999</Position>
+<Axis>0 -1 0</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="cylinder">
+<InstancePath>
+<Uid>worldframe-1</Uid>
+</InstancePath>
+<Position>0 0 0.48750000000000004</Position>
+<Axis>0 0 -1</Axis>
+</ConstraintGeometry>
+</Concentric>
+<Coincident name="Coincident4">
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>cart-1</Uid>
+</InstancePath>
+<Position>0 0 0</Position>
+<Axis>0 1 0</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>worldframe-1</Uid>
+</InstancePath>
+<Position>0 0 0</Position>
+<Axis>0 0 1</Axis>
+</ConstraintGeometry>
+</Coincident>
+<Coincident name="Coincident5">
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>cart-1</Uid>
+</InstancePath>
+<Position>0 0 0</Position>
+<Axis>1 0 0</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>worldframe-1</Uid>
+</InstancePath>
+<Position>0 0 0</Position>
+<Axis>1 0 0</Axis>
+</ConstraintGeometry>
+</Coincident>
+<Coincident name="Coincident7">
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>cart-1</Uid>
+</InstancePath>
+<Position>0.040000000000000008 -0.027500000000000004 0.01999999999999999</Position>
+<Axis>1 0 0</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>pole-1</Uid>
+</InstancePath>
+<Position>0 0 -0.050000000000000003</Position>
+<Axis>0 0 -1</Axis>
+</ConstraintGeometry>
+</Coincident>
+<Parallel name="Parallel4">
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>cart-1</Uid>
+</InstancePath>
+<Position>0 0 -0.01999999999999999</Position>
+<Axis>0 0 -1</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="plane">
+<InstancePath>
+<Uid>pole-1</Uid>
+</InstancePath>
+<Position>0 0.29400000000000015 0.045000000000000005</Position>
+<Axis>1.6653345369377343e-16 1.0000000000000002 0</Axis>
+</ConstraintGeometry>
+</Parallel>
+<Concentric name="Concentric3">
+<ConstraintGeometry geomType="cylinder">
+<InstancePath>
+<Uid>cart-1</Uid>
+</InstancePath>
+<Position>-0.068284271247461906 0 0</Position>
+<Axis>1 0 0</Axis>
+</ConstraintGeometry>
+<ConstraintGeometry geomType="cylinder">
+<InstancePath>
+<Uid>pole-1</Uid>
+</InstancePath>
+<Position>0 0 0.050000000000000003</Position>
+<Axis>0 0 -1</Axis>
+</ConstraintGeometry>
+</Concentric>
+</Constraints>
+</RootAssembly>
+<Assemblies>
+</Assemblies>
+<Parts>
+<Part name="cart" uid="cart*:*Default" version="190">
+<ModelUnits mass="kilogram" length="millimeter"/>
+<PartFile name="cart.SLDPRT" type="SolidWorks Part"/>
+<MassProperties>
+<Mass>0.05911769838837861</Mass>
+<CenterOfMass>0 0 -0.0084268671803051261</CenterOfMass>
+<Inertia>2.1955477069530994e-05 5.8486924496413555e-05 6.5128817780223805e-05 0 0 0</Inertia>
+</MassProperties>
+<GeometryFile name="cart_Default_sldprt.STEP" type="STEP"/>
+<VisualProperties>
+<Ambient r="0.89411764705882346" g="0.89411764705882346" b="0.89411764705882346" a="1"/>
+<Diffuse r="0.89411764705882346" g="0.89411764705882346" b="0.89411764705882346" a="1"/>
+<Specular r="0.44705882352941173" g="0.44705882352941173" b="0.44705882352941173" a="1"/>
+<Emissive r="0" g="0" b="0" a="1"/>
+<Shininess>0.3125</Shininess>
+</VisualProperties>
+</Part>
+<Part name="pole" uid="pole*:*Default" version="123">
+<ModelUnits mass="kilogram" length="millimeter"/>
+<PartFile name="pole.SLDPRT" type="SolidWorks Part"/>
+<MassProperties>
+<Mass>0.019633826078982265</Mass>
+<CenterOfMass>-7.6311386108514983e-07 0.11062852776227509 0.033478932080894544</CenterOfMass>
+<Inertia>0.00019733090023537565 1.1898645849201206e-05 0.00018558958145071155 -2.5023301917275615e-05 4.4059549081425584e-11 5.0313328266398834e-10</Inertia>
+</MassProperties>
+<GeometryFile name="pole_Default_sldprt.STEP" type="STEP"/>
+<VisualProperties>
+<Ambient r="0.89411764705882346" g="0.89411764705882346" b="0.89411764705882346" a="1"/>
+<Diffuse r="0.89411764705882346" g="0.89411764705882346" b="0.89411764705882346" a="1"/>
+<Specular r="0.44705882352941173" g="0.44705882352941173" b="0.44705882352941173" a="1"/>
+<Emissive r="0" g="0" b="0" a="1"/>
+<Shininess>0.3125</Shininess>
+</VisualProperties>
+</Part>
+<Part name="worldframe" uid="worldframe*:*Default" version="137">
+<ModelUnits mass="kilogram" length="millimeter"/>
+<PartFile name="worldframe.SLDPRT" type="SolidWorks Part"/>
+<MassProperties>
+<Mass>0.11026990214100178</Mass>
+<CenterOfMass>0 0 0</CenterOfMass>
+<Inertia>0.0087364362393517522 0.0087364362393517522 1.984858238538033e-06 0 0 0</Inertia>
+</MassProperties>
+<GeometryFile name="worldframe_Default_sldprt.STEP" type="STEP"/>
+<VisualProperties>
+<Ambient r="0.89411764705882346" g="0.89411764705882346" b="0.89411764705882346" a="1"/>
+<Diffuse r="0.89411764705882346" g="0.89411764705882346" b="0.89411764705882346" a="1"/>
+<Specular r="0.44705882352941173" g="0.44705882352941173" b="0.44705882352941173" a="1"/>
+<Emissive r="0" g="0" b="0" a="1"/>
+<Shininess>0.3125</Shininess>
+</VisualProperties>
+</Part>
+</Parts>
+</SimscapeMultibodyImportXML>
