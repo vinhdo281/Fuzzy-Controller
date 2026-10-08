@@ -218,7 +218,7 @@ Chạy 3 kịch bản (5°, 20°, 22°) và in kết quả ra terminal.
 python run_simulation_single_fuzzy.py
 ```
 
-Xuất file `fuzzy_single_mujoco_response.png` với 6 đồ thị: góc, vận tốc góc, vị trí xe, vận tốc xe, lực điều khiển, phase portrait.
+Chạy kịch bản phục hồi góc lệch 20° và bám bước đặt vị trí xe, xuất file đồ thị độ phân giải cao 6 kênh `latest_run_response_20deg.png`.
 
 ---
 
@@ -281,21 +281,17 @@ Fuzzy-Controller/
 ├── full_pendulum_assem_DataFile3.m  # Dữ liệu Simscape Multibody (khối lượng, quán tính)
 │
 ├── fuzzy_config_16rules.m           # ★ All-in-one MATLAB: cấu hình FIS + 16 luật + đồ thị
-├── cartpole_single_fuzzy.m          # MATLAB sim đầy đủ: FIS + ODE + đồ thị
-├── cartpole_single_unified.fis      # FIS export — dùng trực tiếp cho Simulink
 │
 ├── fuzzy_single_controller.py       # Python: Single Unified Mamdani FIS (core logic)
 ├── simulate_test.py                 # Bộ kiểm thử 3 kịch bản (5°, 20°, 22°)
-├── run_mujoco_viewer.py             # Viewer 3D tương tác (MuJoCo passive viewer)
-├── run_simulation_single_fuzzy.py   # Chạy sim + xuất đồ thị PNG
-├── plot_latest_run.py               # Vẽ đồ thị 6 kênh từ lần chạy gần nhất
+├── run_mujoco_viewer.py             # Viewer 3D tương tác thời gian thực (MuJoCo passive viewer)
+├── run_simulation_single_fuzzy.py   # Chạy mô phỏng + xuất đồ thị độ phân giải cao 6 kênh
 │
 ├── simscape-multibody-dieu-khien-con-lac-nguoc-voi-fuzzy.md # ★ Bài viết hướng dẫn chi tiết
 ├── index.html                       # Redirect tới bài viết web (GitHub Pages)
 ├── posts/                           # Giao diện web bài viết độc lập (HTML5/KaTeX/CSS)
 │
-├── latest_run_response_20deg.png    # Kết quả mô phỏng 20° (hình trong README)
-└── fuzzy_single_mujoco_response.png # Kết quả đồ thị xuất bởi run_simulation_single_fuzzy.py
+└── latest_run_response_20deg.png    # Kết quả mô phỏng 20° (hình minh họa trong README)
 ```
 
 ---
